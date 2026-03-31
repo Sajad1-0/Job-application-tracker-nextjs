@@ -1,6 +1,119 @@
-import React from 'react';
+/* eslint-disable react/no-unescaped-entities */
+'use client';
+
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { signIn } from '@/lib/auth/auth-client';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const SignIn = () => {
-  return <div>SignIn</div>;
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const result = await signIn.email({
+        email,
+        password,
+      });
+
+      if (result.error) {
+        setError(result.error.message ?? 'Failed to sign in');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      setError('Failed to sign in');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4">
+      <Card className="w-full max-w-md border-gray-200 shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="space-y-1">Sing In</CardTitle>
+          <CardDescription className="text-2xl font-bold text-black">
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="rounded-md text-sm p-3 bg-destructive/15 text-destructive">
+                {error}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-700">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="border-gray-300 focus:border-primary focus:ring-primary"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-700">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="border-gray-300 focus:border-primary focus:ring-primary"
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              {loading ? 'Signing in...' : 'Sign Up'}
+            </Button>
+            <p className="text-center text-sm text-gray-600">
+              Don't have any account?{' '}
+              <Link href="/sign-up" className="font-medium text-primary hover-underline">
+                Sign In
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  );
 };
+
 export default SignIn;

@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -11,7 +12,6 @@ declare global {
   var mongoose: MongooseCache | undefined;
 }
 
-// eslint-disable-next-line prefer-const
 let cached: MongooseCache = global.mongoose || { conn: null, promise: null };
 
 if (!global.mongoose) {
@@ -20,7 +20,7 @@ if (!global.mongoose) {
 
 async function connectDB() {
   if (!MONGODB_URI) {
-    throw new Error('Please define the MongoDB environment variable inside .env');
+    throw new Error('Please define the MONGODB_URI environment variable inside .env');
   }
 
   if (cached.conn) {
@@ -43,6 +43,8 @@ async function connectDB() {
     cached.promise = null;
     throw e;
   }
+
+  return cached.conn;
 }
 
 export default connectDB;
