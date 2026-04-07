@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth/auth';
 import connectDB from '@/lib/db';
 import { Board } from '@/lib/models';
 import { redirect } from 'next/navigation';
+import path from 'path';
 
 const Dashboard = async () => {
   const session = await getSession();
@@ -15,6 +16,9 @@ const Dashboard = async () => {
 
   const board = await Board.findOne({ userId: session.user.id, name: 'Job Hunt' }).populate({
     path: 'columns',
+    populate: {
+      path: 'jobApplications',
+    },
   });
 
   return (
