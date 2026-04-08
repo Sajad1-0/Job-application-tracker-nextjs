@@ -3,23 +3,32 @@ import { getSession } from '@/lib/auth/auth';
 import connectDB from '@/lib/db';
 import { Board } from '@/lib/models';
 import { redirect } from 'next/navigation';
-import path from 'path';
+import { Suspense } from 'react';
 
-const Dashboard = async () => {
-  const session = await getSession();
-
-  if (!session?.user) {
-    redirect('/sign-in');
-  }
-
+const getBoard = async (userId: string) => {
+  'use cache';
   await connectDB();
 
-  const board = await Board.findOne({ userId: session.user.id, name: 'Job Hunt' }).populate({
+  const boardDoc = await Board.findOne({ userId: userId, name: 'Job Hunt' }).populate({
     path: 'columns',
     populate: {
       path: 'jobApplications',
     },
   });
+
+  if (!boardDoc) return null;
+
+  const board = JSON.parse(JSON.stringify(boardDoc));
+
+  return board;
+};
+
+const DashboardPage = async () => {
+  const session = await getSession();
+  const board = await getBoard(session?.user.id || '');
+  if (!session?.user) {
+    redirect('/sign-in');
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -28,9 +37,19 @@ const Dashboard = async () => {
           <h1 className="text-3xl font-bold text-black">{board.name}</h1>
           <p className="text-gray-600">Track your job applications in one place</p>
         </div>
-        <KanbanBoard board={JSON.parse(JSON.stringify(board))} userId={session.user.id} />
+        <KanbanBoard board={board} userId={session.user.id} />
       </div>
     </div>
+  );
+};
+
+const Dashboard = async () => {
+  return (
+    <Suspense
+      fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}
+    >
+      <DashboardPage />
+    </Suspense>
   );
 };
 

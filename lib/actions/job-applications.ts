@@ -3,6 +3,7 @@
 import { getSession } from '@/lib/auth/auth';
 import connectDB from '../db';
 import { Board, Column, JobApplication } from '../models';
+import { revalidatePath } from 'next/cache';
 
 interface jobApplicationData {
   company: string;
@@ -79,5 +80,69 @@ export const createJobApplication = async (data: jobApplicationData) => {
 
   await Column.findByIdAndUpdate(columnId, { $push: { jobApplications: jobApplication._id } });
 
+  revalidatePath('/dashboard');
+
   return { data: JSON.parse(JSON.stringify(jobApplication)) };
+};
+
+const updateJobApplication = async (
+  id: string,
+  updates: {
+    company?: string;
+    position?: string;
+    location?: string;
+    notes?: string;
+    salary?: string;
+    jobUrl?: string;
+    columnId?: string;
+    order?: number;
+    tags?: string[];
+    description?: string;
+  },
+) => {
+  const session = await getSession();
+
+  if (!session?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const jobApplication = await JobApplication.findById(id);
+
+  if (!jobApplication) {
+    throw new Error('Job application not found');
+  }
+
+  if (jobApplication.userId !== session.user.id) {
+    throw new Error('Unauthorized');
+  }
+
+  const { columnId, order, ...otherUpdates } = updates;
+
+  const updateToApply: Partial<{
+    company: string;
+    position: string;
+    location: string;
+    notes: string;
+    salary: string;
+    jobUrl: string;
+    columnId: string;
+    order: number;
+    tags: string[];
+    description: string;
+  }> = otherUpdates;
+
+  const currentColumnId = jobApplication.columnId.toString();
+  const newColumnId = columnId?.toString();
+
+  const isMovingToDifferentColumn = newColumnId && newColumnId !== currentColumnId;
+
+  if (isMovingToDifferentColumn) {
+    await Column.findByIdAndUpdate(currentColumnId, { $pull: { jobApplication: id } });
+
+    const jobsInTargetColumn = await JobApplication.find({ columnId: newColumnId, id: { $ne: id } })
+      .sort({ order: 1 })
+      .lean();
+
+    let newOrderValue: number;
+  }
 };
