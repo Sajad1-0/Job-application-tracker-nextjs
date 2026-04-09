@@ -85,7 +85,7 @@ const SortableJobCard = ({ job, columns }: { job: JobApplication; columns: Colum
 };
 
 const KanbanBoard = ({ board, userId }: KanbanBoardProps) => {
-  const { columns, moveJob } = useBoards();
+  const { columns, moveJob } = useBoards(board);
 
   const sortedColumns = columns?.sort((a, b) => a.order - b.order) || [];
   return (
