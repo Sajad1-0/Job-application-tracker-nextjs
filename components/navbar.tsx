@@ -44,7 +44,7 @@ const Navbar = () => {
                 </Button>
               </Link>
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative w-8 h-8 rounded-full">
                     <Avatar className="w-8 h-8">
                       <AvatarFallback className="text-white bg-primary">
