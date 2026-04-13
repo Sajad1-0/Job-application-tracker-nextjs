@@ -26,9 +26,10 @@ import { Textarea } from './ui/textarea';
 interface JobApplicationProps {
   job: JobApplication;
   columns: Column[];
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
-const JobApplicationCard = ({ job, columns }: JobApplicationProps) => {
+const JobApplicationCard = ({ job, columns, dragHandleProps }: JobApplicationProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     company: job.company,
@@ -83,7 +84,10 @@ const JobApplicationCard = ({ job, columns }: JobApplicationProps) => {
   };
   return (
     <>
-      <Card className="transition-shadow bg-white shadow-sm cursor-pointer hover:shadow-lg group">
+      <Card
+        className="transition-shadow bg-white shadow-sm cursor-pointer hover:shadow-lg group"
+        {...dragHandleProps}
+      >
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">

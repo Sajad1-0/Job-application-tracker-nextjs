@@ -137,7 +137,7 @@ export const updateJobApplication = async (
   const isMovingToDifferentColumn = newColumnId && newColumnId !== currentColumnId;
 
   if (isMovingToDifferentColumn) {
-    await Column.findByIdAndUpdate(currentColumnId, { $pull: { jobApplication: id } });
+    await Column.findByIdAndUpdate(currentColumnId, { $pull: { jobApplications: id } });
 
     const jobsInTargetColumn = await JobApplication.find({ columnId: newColumnId, id: { $ne: id } })
       .sort({ order: 1 })
@@ -197,7 +197,9 @@ export const updateJobApplication = async (
     updatesToApply.order = newOrderValue;
   }
 
-  const updated = await JobApplication.findByIdAndUpdate(id, updatesToApply, { new: true });
+  const updated = await JobApplication.findByIdAndUpdate(id, updatesToApply, {
+    returnDocument: 'after',
+  });
 
   revalidatePath('/dashboard');
 
@@ -221,7 +223,7 @@ export const deleteJobApplication = async (id: string) => {
     return { error: 'Unauthorized' };
   }
 
-  await Column.findByIdAndUpdate(jobApplication.columnId, { $pull: { jobApplication: id } });
+  await Column.findByIdAndUpdate(jobApplication.columnId, { $pull: { jobApplications: id } });
 
   await JobApplication.deleteOne({ _id: id });
   revalidatePath('/dashboard');
