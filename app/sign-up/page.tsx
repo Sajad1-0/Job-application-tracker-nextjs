@@ -38,8 +38,6 @@ const SignUp = () => {
         password,
       });
 
-      console.log('Full signUp result:', JSON.stringify(result, null, 2));
-
       if (result.error) {
         setError(result.error.message ?? 'Failed to sign up');
       } else {
