@@ -1,17 +1,17 @@
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
-import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { initializeUserBoard } from '../init-user-board';
 import connectDB from '../db';
 
 const mongooseInstance = await connectDB();
-const client1 = mongooseInstance.connection.getClient();
-const db = client1.db();
+const client = mongooseInstance.connection.getClient();
+const db = client.db();
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
-    client: client1,
+    client,
   }),
   session: {
     cookieCache: {
@@ -35,14 +35,15 @@ export const auth = betterAuth({
   },
 });
 
-export const getSession = async () => {
+export async function getSession() {
   const result = await auth.api.getSession({
     headers: await headers(),
   });
 
   return result;
-};
-export const signOut = async () => {
+}
+
+export async function signOut() {
   const result = await auth.api.signOut({
     headers: await headers(),
   });
@@ -50,4 +51,4 @@ export const signOut = async () => {
   if (result.success) {
     redirect('/sign-in');
   }
-};
+}
