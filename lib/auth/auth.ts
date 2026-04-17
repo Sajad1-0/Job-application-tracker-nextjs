@@ -13,6 +13,7 @@ export const auth = betterAuth({
   database: mongodbAdapter(db, {
     client,
   }),
+  trustedOrigins: ['https://job-application-tracker-dusky-one.vercel.app'],
   session: {
     cookieCache: {
       enabled: true,
